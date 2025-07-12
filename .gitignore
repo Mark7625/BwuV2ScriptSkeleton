@@ -1,0 +1,127 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# IDE - IntelliJ
+.idea/
+.idea/modules.xml
+.idea/jarRepositories.xml
+.idea/compiler.xml
+.idea/libraries/
+*.iws
+*.iml
+*.ipr
+
+# IDE - Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IDE - VS Code
+.vscode/
+
+# IDE - NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.gradle
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Build outputs
+out/
+bin/
+/build
+*.class
+*.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+!**/src/main/**/out/
+!**/src/test/**/out/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# Maven build directories
+target/
+**/target/
+**/target/**
+*.jar
+*.war
+*.ear
+
+# Gradle build directories
+build/
+**/build/
+**/build/**
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Testing
+/coverage
+.pytest_cache/
+
+# Next.js
+/.next/
+/out/
+
+# Debug and logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+debug.txt
+*.lst
+
+# Environment and local files
+.env*.local
+.env
+#.env.example
+credentials.json
+.tool-versions
+
+# Python
+**/__pycache__/
+/venv/
+
+# Operating System
+.DS_Store
+*.pem
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Commit message files
+commit_msg*.txt
+*_commit_msg.txt
+pr_msg*.txt
+*_pr_msg.txt
+.cursorrules
+.devcontainer/devcontainer.json
+.github/workflows/tests.yml
+.vscode.example/settings.json
+requirements.txt
+scratchpad.md
+tests/__init__.py
+tests/test_llm_api.py
+tests/test_screenshot_verification.py
+tests/test_search_engine.py
+tests/test_web_scraper.py
+tools/llm_api.py
+tools/screenshot_utils.py
+tools/search_engine.py
+tools/web_scraper.py

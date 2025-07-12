@@ -11,7 +11,6 @@ allprojects {
     version = "1.0-SNAPSHOT"
 }
 
-// Add repositories to the root project
 repositories {
     mavenLocal()
     mavenCentral()

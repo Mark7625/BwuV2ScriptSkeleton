@@ -8,6 +8,6 @@ import net.botwithus.scripts.Script;
 public class CowKiller extends Script {
     @Override
     public void run() {
-        // TODO: Add flax picking logic here
+        // TODO: Add Cow logic here
     }
 } 

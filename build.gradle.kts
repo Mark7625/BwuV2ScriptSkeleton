@@ -20,8 +20,22 @@ repositories {
 }
 
 subprojects {
-    apply(plugin = "kotlin")
     apply(plugin = "java")
+
+    if (project.name != "CustomAPI") {
+        apply(plugin = "kotlin")
+        dependencies {
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+            testImplementation(kotlin("test"))
+        }
+    }
+
+    if (project.name != "CustomAPI") {
+        dependencies {
+            implementation(project(":CustomAPI"))
+        }
+    }
 
     java {
         sourceCompatibility = JavaVersion.VERSION_22
@@ -40,14 +54,6 @@ subprojects {
         create("includeInJar") {
             this.isTransitive = false
         }
-    }
-
-    dependencies {
-        implementation(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\api-1.0.0-SNAPSHOT.jar"))
-        implementation(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\imgui-1.0.0-SNAPSHOT.jar"))
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-        testImplementation(kotlin("test"))
     }
 
     val copyJar by tasks.register<Copy>("copyJar") {

@@ -3,4 +3,5 @@ module botwithus.walker.module {
     requires transitive BotWithUs.imgui;
 
     exports botwithus.walker;
+    exports botwithus.ui;
 }

@@ -5,6 +5,7 @@ module CowKiller.main {
     requires botwithus.walker.module;
 
     exports botwithus;
+    exports botwithus.gui;
 
     provides net.botwithus.scripts.Script with botwithus.CowKiller;
 }

@@ -1,9 +1,11 @@
 package botwithus;
 
 import java.util.Collection;
+import java.util.Comparator;
 
 import botwithus.walker.Walker;
 import net.botwithus.rs3.client.Client;
+import net.botwithus.rs3.entities.Entity;
 import net.botwithus.rs3.entities.EntityType;
 import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.entities.PathingEntity;
@@ -60,7 +62,7 @@ public class CowKiller extends Script {
             if (!banker.isEmpty() && !player.isMoving()) {
                 banker.stream()
                     .filter(npc -> npc.getName().equalsIgnoreCase("Banker"))
-                    .filter(npc -> bankArea.contains(npc))
+                    .filter(bankArea::contains)
                     .findFirst()
                     .ifPresent(npc -> {
                         println("Found banker: " + npc.getName());
@@ -87,14 +89,17 @@ public class CowKiller extends Script {
             // Get all NPCs in the world
             Collection<PathingEntity> cows = World.getNpcs();
             // Stream the NPCs and filter them to find the nearest cow
+            // Filter to only include NPCs in the cow area
+            // Filter to only include NPCs with health greater than 0
+            // Filter to only include valid NPCs
+            // Filter to only include NPCs that are not following another NPC
+            // Sort the NPCs by distance to the player
             cows.stream()
-                .filter(npc -> npc.getName().equalsIgnoreCase("Cow")) 
-                .filter(npc -> COW_AREA.contains(npc)) // Filter to only include NPCs in the cow area
-                .filter(npc -> npc.getHealth() > 0) // Filter to only include NPCs with health greater than 0
-                .filter(npc -> npc.isValid()) // Filter to only include valid NPCs
-                .filter(npc -> npc.getFollowingType() != EntityType.NPC_ENTITY) // Filter to only include NPCs that are not following another NPC
-                .sorted((npc1, npc2) -> Double.compare(player.distanceTo(npc1), player.distanceTo(npc2))) // Sort the NPCs by distance to the player
-                .findFirst() // Find the first (nearest) NPC
+                    .filter(npc -> npc.getName().equalsIgnoreCase("Cow"))
+                    .filter(COW_AREA::contains) // Filter to only include NPCs in the cow area
+                    .filter(npc -> npc.getHealth() > 0) // Filter to only include NPCs with health greater than 0
+                    .filter(Entity::isValid) // Filter to only include valid NPCs
+                    .filter(npc -> npc.getFollowingType() != EntityType.NPC_ENTITY).min(Comparator.comparingDouble(player::distanceTo)) // Find the first (nearest) NPC
                 .ifPresent(npc -> {
                     println("Found nearest cow: " + npc.getName());
                     npc.interact("Attack"); // Attack the nearest cow

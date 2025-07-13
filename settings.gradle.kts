@@ -5,5 +5,6 @@ include(
     "CustomAPI",
     "CowKiller",
     "FlaxPicker",
-    "ScriptSkeleton"
+    "ScriptSkeleton",
+    "ScriptSkeletonKotlin"
 )

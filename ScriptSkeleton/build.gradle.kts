@@ -4,3 +4,7 @@ plugins {
     kotlin("jvm")
     java
 }
+
+
+//Add project specific dependencies
+

@@ -2,51 +2,65 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0"
-    java
+    kotlin("jvm") version "2.1.0" apply false
 }
 
 allprojects {
     group = "net.botwithus.example"
     version = "1.0-SNAPSHOT"
-}
-
-repositories {
-    mavenLocal()
-    mavenCentral()
-    flatDir {
-        dirs("C:\\Users\\eztop\\Downloads\\BotWithUsScriptsV2")
-    }
-}
-
-subprojects {
-    apply(plugin = "java")
-
-    if (project.name != "CustomAPI") {
-        apply(plugin = "kotlin")
-        dependencies {
-            implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-            testImplementation(kotlin("test"))
-        }
-    }
-
-    if (project.name != "CustomAPI") {
-        dependencies {
-            implementation(project(":CustomAPI"))
-        }
-    }
-
-    java {
-        sourceCompatibility = JavaVersion.VERSION_22
-        targetCompatibility = JavaVersion.VERSION_22
-    }
 
     repositories {
         mavenLocal()
         mavenCentral()
         flatDir {
             dirs("C:\\Users\\eztop\\Downloads\\BotWithUsScriptsV2")
+        }
+    }
+}
+
+subprojects {
+    apply(plugin = "java")
+
+    // Auto-detect Kotlin files in the project
+    val hasKotlinFiles = fileTree("src").matching {
+        include("**/*.kt")
+    }.files.isNotEmpty()
+
+    // Apply Kotlin plugin only if Kotlin files are present
+    if (hasKotlinFiles) {
+        apply(plugin = "org.jetbrains.kotlin.jvm")
+        
+        dependencies {
+            "implementation"("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+            "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+            "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
+        }
+        
+        println("Project ${project.name}: Kotlin support enabled (found .kt files)")
+    } else {
+        println("Project ${project.name}: Java-only project")
+    }
+
+    // Add CustomAPI dependency to all projects except CustomAPI itself
+    if (project.name != "CustomAPI") {
+        dependencies {
+            "implementation"(project(":CustomAPI"))
+        }
+    }
+
+    // external dependencies for all projects
+    dependencies {
+        "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\api-1.0.0-SNAPSHOT.jar"))
+        "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\imgui-1.0.0-SNAPSHOT.jar"))
+    }
+
+    configure<JavaPluginExtension> {
+        sourceCompatibility = JavaVersion.VERSION_22
+        targetCompatibility = JavaVersion.VERSION_22
+        
+        // Enable module path inference for projects with module-info.java
+        if (file("src/main/java/module-info.java").exists()) {
+            modularity.inferModulePath.set(true)
         }
     }
 
@@ -70,14 +84,17 @@ subprojects {
         finalizedBy(copyJar)
     }
 
-    tasks.test {
+    tasks.named<Test>("test") {
         useJUnitPlatform()
     }
 
-    tasks.withType<KotlinCompile> {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_22)
-            freeCompilerArgs.add("-Xjsr305=strict")
+    // Only configure Kotlin tasks if Kotlin plugin is applied
+    if (hasKotlinFiles) {
+        tasks.withType<KotlinCompile> {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_22)
+                freeCompilerArgs.add("-Xjsr305=strict")
+            }
         }
     }
 

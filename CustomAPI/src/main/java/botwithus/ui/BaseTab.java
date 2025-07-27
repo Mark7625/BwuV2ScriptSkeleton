@@ -5,7 +5,6 @@ import net.botwithus.imgui.ImGui;
 /**
  * Base abstract class for all UI tabs in the GUI.
  * Provides common functionality and structure for tab implementations.
- * Uses the ImGui API for cleaner code.
  */
 public abstract class BaseTab {
     protected String searchText = "";

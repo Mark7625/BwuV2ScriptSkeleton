@@ -29,29 +29,28 @@ subprojects {
     // Apply Kotlin plugin only if Kotlin files are present
     if (hasKotlinFiles) {
         apply(plugin = "org.jetbrains.kotlin.jvm")
-        
-        dependencies {
-            "implementation"("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
-            "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-            "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
-        }
-        
         println("Project ${project.name}: Kotlin support enabled (found .kt files)")
     } else {
         println("Project ${project.name}: Java-only project")
     }
 
-    // Add CustomAPI dependency to all projects except CustomAPI itself
-    if (project.name != "CustomAPI") {
-        dependencies {
-            "implementation"(project(":CustomAPI"))
-        }
-    }
-
-    // external dependencies for all projects
+    // Configure dependencies
     dependencies {
+        // External dependencies for all projects
         "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\api-1.0.0-SNAPSHOT.jar"))
         "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\imgui-1.0.0-SNAPSHOT.jar"))
+        
+        // Add CustomAPI dependency to all projects except CustomAPI itself
+        if (project.name != "CustomAPI") {
+            "implementation"(project(":CustomAPI"))
+        }
+        
+        // Add Kotlin dependencies only if Kotlin files are present
+        if (hasKotlinFiles) {
+            "implementation"("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+            "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+            "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
+        }
     }
 
     configure<JavaPluginExtension> {

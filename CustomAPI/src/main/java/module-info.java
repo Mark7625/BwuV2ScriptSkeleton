@@ -4,4 +4,7 @@ module botwithus.walker.module {
 
     exports botwithus.walker;
     exports botwithus.ui;
+    exports botwithus.script;
+    exports botwithus.areas;
+    exports botwithus.api;
 }

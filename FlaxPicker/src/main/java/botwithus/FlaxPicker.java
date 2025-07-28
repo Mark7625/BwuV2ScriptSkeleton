@@ -1,6 +1,8 @@
 package botwithus;
 
+import botwithus.state.BankState;
 import botwithus.state.BotState;
+import botwithus.state.FlaxPickState;
 import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.world.Area;
 import net.botwithus.rs3.world.Coordinate;
@@ -29,5 +31,15 @@ public class FlaxPicker extends PermissiveScript {
     public boolean onPreTick() {
         player = LocalPlayer.self();
         return super.onPreTick() && player.isValid();
+    }
+
+    @Override
+    public void onInitialize() {
+        super.onInitialize();
+
+        initStates(
+            new BankState(this, BotState.BANKING.getDescription()),
+            new FlaxPickState(this, BotState.FLAX_PICKING.getDescription())
+        );
     }
 }

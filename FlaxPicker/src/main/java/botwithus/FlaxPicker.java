@@ -13,7 +13,7 @@ import net.botwithus.xapi.script.permissive.node.LeafNode;
 @Info(name = "FlaxPicker", description = "FlaxPicker script", version = "1.0.0", author = "BotWithUs")
 public class FlaxPicker extends PermissiveScript {
     public Area bankArea = new Area.Rectangular(new Coordinate(2872, 3420, 0), new Coordinate(2878, 3414, 0));
-    public Area flaxArea = new Area.Rectangular(new Coordinate(2881, 3478, 0), new Coordinate(2889, 3475, 0));
+    public Area flaxArea = new Area.Rectangular(new Coordinate(2881, 3474, 0), new Coordinate(2889, 3470, 0));
 
     public LocalPlayer player;
 

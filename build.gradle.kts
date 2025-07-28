@@ -12,8 +12,8 @@ allprojects {
     repositories {
         mavenLocal()
         mavenCentral()
-        flatDir {
-            dirs("C:\\Users\\eztop\\Downloads\\BotWithUsScriptsV2")
+        maven {
+            setUrl("https://nexus.botwithus.net/repository/maven-releases/")
         }
     }
 }
@@ -34,11 +34,19 @@ subprojects {
         println("Project ${project.name}: Java-only project")
     }
 
+    // Create configurations first
+    configurations {
+        create("includeInJar") {
+            this.isTransitive = false
+        }
+    }
+
     // Configure dependencies
     dependencies {
         // External dependencies for all projects
-        "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\api-1.0.0-SNAPSHOT.jar"))
-        "implementation"(files("C:\\Users\\eztop\\.BotWithUs\\BotWithUsScriptsV2\\imgui-1.0.0-SNAPSHOT.jar"))
+        "implementation"("net.botwithus.api:api:1.0.0-SNAPSHOT")
+        "implementation"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
+        "implementation"("net.botwithus.imgui:imgui:1.0.0-SNAPSHOT")
         
         // Add CustomAPI dependency to all projects except CustomAPI itself
         if (project.name != "CustomAPI") {
@@ -51,6 +59,9 @@ subprojects {
             "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
             "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
         }
+        
+        // Include xapi in the resulting jar
+        "includeInJar"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
     }
 
     configure<JavaPluginExtension> {
@@ -60,12 +71,6 @@ subprojects {
         // Enable module path inference for projects with module-info.java
         if (file("src/main/java/module-info.java").exists()) {
             modularity.inferModulePath.set(true)
-        }
-    }
-
-    configurations {
-        create("includeInJar") {
-            this.isTransitive = false
         }
     }
 

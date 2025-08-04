@@ -1,15 +1,9 @@
 package botwithus;
 
-import java.util.Collection;
-import java.util.Comparator;
-
 import botwithus.gui.ChickenKillerGUI;
 import botwithus.areas.GameAreas;
 import net.botwithus.rs3.client.Client;
-import net.botwithus.rs3.entities.Entity;
-import net.botwithus.rs3.entities.EntityType;
-import net.botwithus.rs3.entities.LocalPlayer;
-import net.botwithus.rs3.entities.PathingEntity;
+import net.botwithus.rs3.entities.*;
 import net.botwithus.rs3.inventories.Inventory;
 import net.botwithus.rs3.inventories.InventoryManager;
 import net.botwithus.rs3.minimenu.Action;
@@ -20,6 +14,9 @@ import net.botwithus.scripts.Info;
 import net.botwithus.scripts.Script;
 import net.botwithus.ui.workspace.Workspace;
 
+import java.util.Collection;
+import java.util.Comparator;
+
 @Info(name = "CoaezChickenKiller", description = "ChickenKiller script", version = "1.0.0", author = "coaez")
 public class ChickenKiller extends Script {
 
@@ -29,8 +26,11 @@ public class ChickenKiller extends Script {
     private boolean bankingEnabled = true;
     // Timestamp of last chicken interaction to prevent spam attacking
     private long lastChickenInteractionTime = 0;
+    // Timestamp of last ground item pickup to prevent spam
+    private long lastGroundItemPickupTime = 0;
     // Delay in milliseconds before attacking another chicken (5 seconds)
     private static final long CHICKEN_ATTACK_DELAY = 5000;
+    private static final long GROUND_ITEM_PICKUP_DELAY = 2000;
 
     private final ChickenKillerGUI chickenKillerGUI;
 
@@ -85,8 +85,43 @@ public class ChickenKiller extends Script {
                 return;
             }
 
+            // If we are in the chicken area, first priority is picking up ground items
+            if (GameAreas.CHICKEN_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
+                // Pick up feathers and bones
+                Collection<ItemStack> groundItems = World.getGroundItems();
+                groundItems.stream()
+                        .filter(GameAreas.CHICKEN_AREA::contains) // Filter to only include items in the chicken area
+                        .filter(ItemStack::isValid) // Filter to only include valid ItemStacks
+                        .filter(itemStack -> {
+                            // Check if the ItemStack contains feathers or bones
+                            return itemStack.getItems().stream().anyMatch(item ->
+                                item.getName().equalsIgnoreCase("Feather") ||
+                                item.getName().equalsIgnoreCase("Bones"));
+                        })
+                        .min(Comparator.comparingDouble(player::distanceTo)) // Find the nearest item
+                        .ifPresent(itemStack -> {
+                            // Find the specific item to pick up
+                            itemStack.getItems().stream()
+                                .filter(item -> item.getName().equalsIgnoreCase("Feather") ||
+                                              item.getName().equalsIgnoreCase("Bones"))
+                                .findFirst()
+                                .ifPresent(item -> {
+                                    println("Found ground item: " + item.getName() + " at distance: " + player.distanceTo(itemStack));
+                                    long currentTime = System.currentTimeMillis();
+                                    // Check if the delay has passed since the last pickup
+                                    if (currentTime - lastGroundItemPickupTime >= GROUND_ITEM_PICKUP_DELAY) {
+                                        int pickup = item.interact(2); // Pick up the item
+                                        lastGroundItemPickupTime = currentTime; // Update the last pickup time
+                                        if (pickup != 0) {
+                                            println("Sent pickup command for: " + item.getName() + " with result: " + pickup);
+                                        }
+                                    }
+                                });
+                        });
+            }
+
             // If we are in the chicken area, we can attack chickens unless we are already have a target
-            if (LocalPlayer.self().getTargetType() != EntityType.NPC_ENTITY) {
+            if (LocalPlayer.self().getTargetType() != EntityType.NPC_ENTITY && GameAreas.CHICKEN_AREA.contains(LocalPlayer.self())) {
                 println("We are in the chicken area, but not targeting a chicken. Let's find a chicken to attack.");
                 // Get all NPCs in the world
                 Collection<PathingEntity> chickens = World.getNpcs();

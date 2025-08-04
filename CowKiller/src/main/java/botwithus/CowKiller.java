@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Comparator;
 
 import botwithus.gui.CowKillerGUI;
-import botwithus.walker.Walker;
 import botwithus.areas.GameAreas;
 import net.botwithus.rs3.client.Client;
 import net.botwithus.rs3.entities.Entity;
@@ -13,6 +12,8 @@ import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.entities.PathingEntity;
 import net.botwithus.rs3.inventories.Inventory;
 import net.botwithus.rs3.inventories.InventoryManager;
+import net.botwithus.rs3.minimenu.Action;
+import net.botwithus.rs3.minimenu.MiniMenu;
 import net.botwithus.rs3.world.ClientState;
 import net.botwithus.rs3.world.World;
 import net.botwithus.scripts.Info;
@@ -26,6 +27,10 @@ public class CowKiller extends Script {
     private static final int BACKPACK_INVENTORY_ID = 93;
     // Boolean to indicate if we are banking or not
     private boolean bankingEnabled = true;
+    // Timestamp of last cow interaction to prevent spam attacking
+    private long lastCowInteractionTime = 0;
+    // Delay in milliseconds before attacking another cow (5 seconds)
+    private static final long COW_ATTACK_DELAY = 5000;
 
     private final CowKillerGUI cowKillerGUI;
 
@@ -50,7 +55,8 @@ public class CowKiller extends Script {
                 if (!GameAreas.BURTHORPE_BANK_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
                     println("Moving to bank...");
                     // Use the Walker from custom api to move to the bank location
-                    Walker.bresenhamWalkTo(GameAreas.BURTHORPE_BANK_LOCATION, false, 20);
+                    int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.BURTHORPE_BANK_LOCATION.x(),
+                            GameAreas.BURTHORPE_BANK_LOCATION.y());
                     return;
                 }
 
@@ -75,7 +81,7 @@ public class CowKiller extends Script {
             // Check if we are in the cow area or moving
             if (!GameAreas.COW_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
                 println("Moving to cow area...");
-                Walker.bresenhamWalkTo(GameAreas.COW_AREA.getRandomCoordinate(), false, 20);
+                int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.COW_AREA.getRandomCoordinate().x(), GameAreas.COW_AREA.getRandomCoordinate().y());
                 return;
             }
 
@@ -95,9 +101,16 @@ public class CowKiller extends Script {
                         .min(Comparator.comparingDouble(player::distanceTo)) // Find the first (nearest) NPC
                         .ifPresent(npc -> {
                             println("Found nearest cow: " + npc.getName());
-                            int attack = npc.interact(0);
-                            if(attack != 0){
-                                println("Sent attack command to cow: " + npc.getName() + " with result: " + attack + " distance: " + player.distanceTo(npc));
+                            long currentTime = System.currentTimeMillis();
+                            // Check if the delay has passed since the last interaction
+                            if (currentTime - lastCowInteractionTime >= COW_ATTACK_DELAY) {
+                                int attack = npc.interact(2); // Attack the cow
+                                lastCowInteractionTime = currentTime; // Update the last interaction time
+                                if(attack != 0){
+                                    println("Sent attack command to cow: " + npc.getName() + " with result: " + attack + " distance: " + player.distanceTo(npc));
+                                }
+                            } else {
+                                println("Attack on cow: " + npc.getName() + " is on cooldown. Remaining time: " + ((COW_ATTACK_DELAY - (currentTime - lastCowInteractionTime)) / 1000) + " seconds.");
                             }
                         });
             }

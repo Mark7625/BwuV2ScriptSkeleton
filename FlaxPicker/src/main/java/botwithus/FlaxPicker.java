@@ -41,5 +41,6 @@ public class FlaxPicker extends PermissiveScript {
             new BankState(this, BotState.BANKING.getDescription()),
             new FlaxPickState(this, BotState.FLAX_PICKING.getDescription())
         );
+
     }
 }

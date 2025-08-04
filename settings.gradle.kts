@@ -1,7 +1,7 @@
 rootProject.name = "BWU2VScriptsExample"
 
 include(
-    "CowKiller",
+    "ChickenKiller",
     "FlaxPicker",
     "ScriptSkeleton",
     "ScriptSkeletonKotlin"

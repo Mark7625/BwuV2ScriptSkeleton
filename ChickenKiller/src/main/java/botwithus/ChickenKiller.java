@@ -3,7 +3,7 @@ package botwithus;
 import java.util.Collection;
 import java.util.Comparator;
 
-import botwithus.gui.CowKillerGUI;
+import botwithus.gui.ChickenKillerGUI;
 import botwithus.areas.GameAreas;
 import net.botwithus.rs3.client.Client;
 import net.botwithus.rs3.entities.Entity;
@@ -20,22 +20,22 @@ import net.botwithus.scripts.Info;
 import net.botwithus.scripts.Script;
 import net.botwithus.ui.workspace.Workspace;
 
-@Info(name = "CoaezCowKiller", description = "CowKiller script", version = "1.0.0", author = "coaez")
-public class CowKiller extends Script {
+@Info(name = "CoaezChickenKiller", description = "ChickenKiller script", version = "1.0.0", author = "coaez")
+public class ChickenKiller extends Script {
 
     // Inventory interface ID
     private static final int BACKPACK_INVENTORY_ID = 93;
     // Boolean to indicate if we are banking or not
     private boolean bankingEnabled = true;
-    // Timestamp of last cow interaction to prevent spam attacking
-    private long lastCowInteractionTime = 0;
-    // Delay in milliseconds before attacking another cow (5 seconds)
-    private static final long COW_ATTACK_DELAY = 5000;
+    // Timestamp of last chicken interaction to prevent spam attacking
+    private long lastChickenInteractionTime = 0;
+    // Delay in milliseconds before attacking another chicken (5 seconds)
+    private static final long CHICKEN_ATTACK_DELAY = 5000;
 
-    private final CowKillerGUI cowKillerGUI;
+    private final ChickenKillerGUI chickenKillerGUI;
 
-    public CowKiller() {
-        this.cowKillerGUI = new CowKillerGUI(this);
+    public ChickenKiller() {
+        this.chickenKillerGUI = new ChickenKillerGUI(this);
     }
 
     @Override
@@ -75,52 +75,50 @@ public class CowKiller extends Script {
                 return;
             }
 
-            // If we are here, we are not banking, so we can continue with killing cows
-            println("Continuing with cow killing...");
+            // If we are here, we are not banking, so we can continue with killing chickens
+            println("Continuing with chicken killing...");
 
-            // Check if we are in the cow area or moving
-            if (!GameAreas.COW_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
-                println("Moving to cow area...");
-                int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.COW_AREA.getRandomCoordinate().x(), GameAreas.COW_AREA.getRandomCoordinate().y());
+            // Check if we are in the chicken area or moving
+            if (!GameAreas.CHICKEN_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
+                println("Moving to chicken area...");
+                int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.CHICKEN_AREA.getRandomCoordinate().x(), GameAreas.CHICKEN_AREA.getRandomCoordinate().y());
                 return;
             }
 
-            // If we are in the cow area, we can attack cows unless we are already have a target
+            // If we are in the chicken area, we can attack chickens unless we are already have a target
             if (LocalPlayer.self().getTargetType() != EntityType.NPC_ENTITY) {
-                println("We are in the cow area, but not targeting a cow. Let's find a cow to attack.");
+                println("We are in the chicken area, but not targeting a chicken. Let's find a chicken to attack.");
                 // Get all NPCs in the world
-                Collection<PathingEntity> cows = World.getNpcs();
-                // Filter the NPCs to find the nearest cow that is valid, has health, and is not
+                Collection<PathingEntity> chickens = World.getNpcs();
+                // Filter the NPCs to find the nearest chicken that is valid, has health, and is not
                 // already a target
-                cows.stream()
-                        .filter(npc -> npc.getName().equalsIgnoreCase("Cow"))
-                        .filter(GameAreas.COW_AREA::contains) // Filter to only include NPCs in the cow area
+                chickens.stream()
+                        .filter(npc -> npc.getName().equalsIgnoreCase("Chicken"))
+                        .filter(GameAreas.CHICKEN_AREA::contains) // Filter to only include NPCs in the chicken area
                         .filter(npc -> npc.getHealth() > 0) // Filter to only include NPCs with health greater than 0
                         .filter(Entity::isValid) // Filter to only include valid NPCs
                         .filter(npc -> npc.getFollowingType() != EntityType.NPC_ENTITY)
                         .min(Comparator.comparingDouble(player::distanceTo)) // Find the first (nearest) NPC
                         .ifPresent(npc -> {
-                            println("Found nearest cow: " + npc.getName());
+                            println("Found nearest chicken: " + npc.getName());
                             long currentTime = System.currentTimeMillis();
                             // Check if the delay has passed since the last interaction
-                            if (currentTime - lastCowInteractionTime >= COW_ATTACK_DELAY) {
-                                int attack = npc.interact(2); // Attack the cow
-                                lastCowInteractionTime = currentTime; // Update the last interaction time
+                            if (currentTime - lastChickenInteractionTime >= CHICKEN_ATTACK_DELAY) {
+                                int attack = npc.interact("Attack"); // Attack the chicken
+                                lastChickenInteractionTime = currentTime; // Update the last interaction time
                                 if(attack != 0){
-                                    println("Sent attack command to cow: " + npc.getName() + " with result: " + attack + " distance: " + player.distanceTo(npc));
+                                    println("Sent attack command to chicken: " + npc.getName() + " with result: " + attack + " distance: " + player.distanceTo(npc));
                                 }
-                            } else {
-                                println("Attack on cow: " + npc.getName() + " is on cooldown. Remaining time: " + ((COW_ATTACK_DELAY - (currentTime - lastCowInteractionTime)) / 1000) + " seconds.");
                             }
                         });
             }
         } catch (Exception e) {
-            println("ERROR in CowKiller.run(): " + e.getMessage());
+            println("ERROR in ChickenKiller.run(): " + e.getMessage());
             e.printStackTrace();
             // Optionally stop the script on critical errors
             // this.stop();
         } catch (Throwable t) {
-            println("CRITICAL ERROR in CowKiller.run(): " + t.getMessage());
+            println("CRITICAL ERROR in ChickenKiller.run(): " + t.getMessage());
             t.printStackTrace();
             // Stop script on critical errors
         }
@@ -155,25 +153,25 @@ public class CowKiller extends Script {
     @Override
     public void onDraw(Workspace workspace) {
         super.onDraw(workspace);
-        cowKillerGUI.render(workspace);
+        chickenKillerGUI.render(workspace);
     }
 
     @Override
     public void onActivation() {
         super.onActivation();
-        println("CowKiller activated.");
+        println("ChickenKiller activated.");
     }
 
     @Override
     public void onDeactivation() {
         super.onDeactivation();
-        println("CowKiller deactivated.");
+        println("ChickenKiller deactivated.");
     }
 
     @Override
     public void onInitialize() {
         super.onInitialize();
-        println("CowKiller initialized.");
+        println("ChickenKiller initialized.");
     }
 
 }

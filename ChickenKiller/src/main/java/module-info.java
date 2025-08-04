@@ -6,5 +6,5 @@ module CowKiller.main {
     exports botwithus;
     exports botwithus.gui;
 
-    provides net.botwithus.scripts.Script with botwithus.CowKiller;
+    provides net.botwithus.scripts.Script with botwithus.ChickenKiller;
 }

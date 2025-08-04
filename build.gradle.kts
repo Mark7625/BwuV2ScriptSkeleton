@@ -47,7 +47,7 @@ subprojects {
     // Configure dependencies
     dependencies {
         // External dependencies for all projects
-        "implementation"("net.botwithus.api:api:1.0.2-SNAPSHOT")
+        "implementation"("net.botwithus.api:api:1.0.3-SNAPSHOT")
         "implementation"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
         "implementation"("net.botwithus.imgui:imgui:1.0.1-SNAPSHOT")
         

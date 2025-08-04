@@ -95,7 +95,10 @@ public class CowKiller extends Script {
                         .min(Comparator.comparingDouble(player::distanceTo)) // Find the first (nearest) NPC
                         .ifPresent(npc -> {
                             println("Found nearest cow: " + npc.getName());
-                            npc.interact("Attack"); // Attack the nearest cow
+                            int attack = npc.interact(0);
+                            if(attack != 0){
+                                println("Sent attack command to cow: " + npc.getName() + " with result: " + attack + " distance: " + player.distanceTo(npc));
+                            }
                         });
             }
         } catch (Exception e) {

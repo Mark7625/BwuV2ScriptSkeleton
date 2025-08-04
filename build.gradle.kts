@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.0" apply false
+    kotlin("jvm") version "2.2.0" apply false
 }
 
 allprojects {
@@ -14,6 +14,9 @@ allprojects {
         mavenCentral()
         maven {
             setUrl("https://nexus.botwithus.net/repository/maven-releases/")
+        }
+        maven {
+            setUrl("https://nexus.botwithus.net/repository/maven-snapshots/")
         }
     }
 }
@@ -44,14 +47,9 @@ subprojects {
     // Configure dependencies
     dependencies {
         // External dependencies for all projects
-        "implementation"("net.botwithus.api:api:1.0.0-SNAPSHOT")
+        "implementation"("net.botwithus.api:api:1.0.2-SNAPSHOT")
         "implementation"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
-        "implementation"("net.botwithus.imgui:imgui:1.0.0-SNAPSHOT")
-        
-        // Add CustomAPI dependency to all projects except CustomAPI itself
-        if (project.name != "CustomAPI") {
-            "implementation"(project(":CustomAPI"))
-        }
+        "implementation"("net.botwithus.imgui:imgui:1.0.1-SNAPSHOT")
         
         // Add Kotlin dependencies only if Kotlin files are present
         if (hasKotlinFiles) {
@@ -59,14 +57,15 @@ subprojects {
             "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
             "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
         }
-        
-        // Include xapi in the resulting jar
-        "includeInJar"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
+
+        if (project.name != "FlaxPicker") {
+            "includeInJar"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
+        }
     }
 
     configure<JavaPluginExtension> {
-        sourceCompatibility = JavaVersion.VERSION_22
-        targetCompatibility = JavaVersion.VERSION_22
+        sourceCompatibility = JavaVersion.VERSION_24
+        targetCompatibility = JavaVersion.VERSION_24
         
         // Enable module path inference for projects with module-info.java
         if (file("src/main/java/module-info.java").exists()) {
@@ -96,13 +95,13 @@ subprojects {
     if (hasKotlinFiles) {
         tasks.withType<KotlinCompile> {
             compilerOptions {
-                jvmTarget.set(JvmTarget.JVM_22)
+                jvmTarget.set(JvmTarget.JVM_24)
                 freeCompilerArgs.add("-Xjsr305=strict")
             }
         }
     }
 
     tasks.withType<JavaCompile> {
-        options.release.set(22)
+        options.release.set(24)
     }
 }

@@ -3,10 +3,10 @@ package botwithus.ui;
 import net.botwithus.imgui.ImGui;
 
 /**
- * Base abstract class for all UI tabs in the GUI.
+ * Base class for all UI tabs in the GUI.
  * Provides common functionality and structure for tab implementations.
  */
-public abstract class BaseTab {
+public class BaseTab {
     protected String searchText = "";
 
     /**
@@ -17,10 +17,12 @@ public abstract class BaseTab {
     }
 
     /**
-     * Render method that all tab implementations must override.
+     * Render method that tab implementations can override.
      * This handles the UI rendering for the tab.
      */
-    public abstract void render();
+    public void render() {
+        // Default implementation - override in subclasses
+    }
 
     /**
      * Helper method to render a search box.
@@ -41,13 +43,13 @@ public abstract class BaseTab {
     protected void renderProgress(int loaded, int total) {
         if (loaded < total) {
             ImGui.text("Loading... (" + loaded + "/" + total + ")");
-            
+
             // Add a progress bar
             float progress = total > 0 ? (float) loaded / total : 0.0f;
             ImGui.progressBar(progress, -1.0f, 0.0f, loaded + "/" + total);
         }
     }
-    
+
     /**
      * Helper method to render a section header with separator.
      * @param title The section title
@@ -56,7 +58,7 @@ public abstract class BaseTab {
         ImGui.text(title);
         ImGui.separator();
     }
-    
+
     /**
      * Helper method to render a collapsible section.
      * @param title The section title
@@ -68,7 +70,7 @@ public abstract class BaseTab {
             content.run();
         }
     }
-    
+
     /**
      * Helper method to render a collapsible section (closed by default).
      * @param title The section title
@@ -77,7 +79,7 @@ public abstract class BaseTab {
     protected void renderCollapsibleSection(String title, Runnable content) {
         renderCollapsibleSection(title, content, false);
     }
-    
+
     /**
      * Helper method to render a button with action.
      * @param text The button text
@@ -91,7 +93,7 @@ public abstract class BaseTab {
         }
         return false;
     }
-    
+
     /**
      * Helper method to render a button with custom size.
      * @param text The button text
@@ -107,7 +109,7 @@ public abstract class BaseTab {
         }
         return false;
     }
-    
+
     /**
      * Helper method to render a checkbox.
      * @param label The checkbox label
@@ -122,7 +124,7 @@ public abstract class BaseTab {
         }
         return value;
     }
-    
+
     /**
      * Helper method to render an integer slider.
      * @param label The slider label
@@ -137,7 +139,7 @@ public abstract class BaseTab {
         onChange.run();
         return value;
     }
-    
+
     /**
      * Helper method to render a float slider.
      * @param label The slider label
@@ -152,34 +154,21 @@ public abstract class BaseTab {
         onChange.run();
         return value;
     }
-    
+
     /**
      * Helper method to add spacing between elements.
      */
     protected void addSpacing() {
         ImGui.spacing();
     }
-    
+
     /**
      * Helper method to add elements on the same line.
      */
     protected void sameLine() {
         ImGui.sameLine(0, 0);
     }
-    
-    /**
-     * Helper method to add a help marker with tooltip.
-     * @param helpText The help text to display
-     */
-    protected void addHelpMarker(String helpText) {
-        ImGui.textDisabled("(?)");
-        if (ImGui.isItemHovered()) {
-            ImGui.beginTooltip();
-            ImGui.text(helpText);
-            ImGui.endTooltip();
-        }
-    }
-    
+
     /**
      * Callback method that can be overridden to handle search text changes.
      * @param newSearchText The new search text
@@ -187,4 +176,4 @@ public abstract class BaseTab {
     protected void onSearchTextChanged(String newSearchText) {
         // Override in subclasses to handle search text changes
     }
-} 
+}

@@ -1,9 +1,8 @@
 module FlaxPicker.main {
-    requires BotWithUs.xapi;
+    requires transitive BotWithUs.xapi;
     requires BotWithUs.api;
+    requires java.base;
 
-    exports botwithus;
-    exports botwithus.state;
 
     provides net.botwithus.scripts.Script with botwithus.FlaxPicker;
 }

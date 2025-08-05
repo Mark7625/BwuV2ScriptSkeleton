@@ -17,7 +17,7 @@ A comprehensive chicken killing and looting script featuring:
 - **GUI Interface**: Simple checkbox to toggle banking on/off
 
 **Features:**
-- Refactored modular architecture with separate classes for different responsibilities
+- Modular architecture with separate classes for different responsibilities
 - Real-time delay management to prevent spam clicking
 - Health monitoring and automatic healing at bank
 - Area-based filtering for efficient item collection
@@ -34,7 +34,7 @@ Template projects for creating new scripts:
 ## Getting Started
 
 ### Prerequisites
-- Java 11 or higher
+- Java 24
 - BotWithUs client and API
 - Gradle (wrapper included)
 

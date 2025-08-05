@@ -1,6 +1,10 @@
 package botwithus;
 
+import botwithus.banking.Banking;
+import botwithus.combat.Combat;
 import botwithus.gui.ChickenKillerGUI;
+import botwithus.loot.Looting;
+import botwithus.movement.Movement;
 import net.botwithus.rs3.client.Client;
 import net.botwithus.rs3.world.ClientState;
 import net.botwithus.scripts.Info;
@@ -107,12 +111,19 @@ public class ChickenKiller extends Script {
     public void onActivation() {
         super.onActivation();
         println("ChickenKiller activated.");
+        if (chickenKillerGUI != null) {
+            chickenKillerGUI.setVisible(true);
+        }
     }
 
     @Override
     public void onDeactivation() {
         super.onDeactivation();
         println("ChickenKiller deactivated.");
+        // Hide GUI when script is deactivated
+        if (chickenKillerGUI != null) {
+            chickenKillerGUI.setVisible(false);
+        }
     }
 
     @Override

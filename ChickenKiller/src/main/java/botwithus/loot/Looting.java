@@ -1,4 +1,4 @@
-package botwithus;
+package botwithus.loot;
 
 import botwithus.areas.GameAreas;
 import net.botwithus.rs3.entities.ItemStack;

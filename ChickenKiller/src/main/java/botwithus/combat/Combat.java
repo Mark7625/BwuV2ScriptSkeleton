@@ -1,4 +1,4 @@
-package botwithus;
+package botwithus.combat;
 
 import botwithus.areas.GameAreas;
 import net.botwithus.rs3.entities.Entity;
@@ -23,7 +23,7 @@ public class Combat {
         LocalPlayer player = LocalPlayer.self();
 
         // Only attack if player is not already targeting something and is in chicken area
-        if (player.getTargetType() == EntityType.NPC_ENTITY || !GameAreas.CHICKEN_AREA.contains(player)) {
+        if (!GameAreas.CHICKEN_AREA.contains(player)) {
             return false;
         }
 

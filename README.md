@@ -117,11 +117,3 @@ Configurable delays in script classes:
 3. Follow the established code organization patterns
 4. Test thoroughly with the BotWithUs client
 5. Submit a pull request
-
-## License
-
-This project is licensed under the terms specified in the LICENSE file.
-
-## Disclaimer
-
-These scripts are for educational purposes. Use responsibly and in accordance with game terms of service.

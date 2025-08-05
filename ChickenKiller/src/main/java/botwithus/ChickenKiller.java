@@ -111,19 +111,12 @@ public class ChickenKiller extends Script {
     public void onActivation() {
         super.onActivation();
         println("ChickenKiller activated.");
-        if (chickenKillerGUI != null) {
-            chickenKillerGUI.setVisible(true);
-        }
     }
 
     @Override
     public void onDeactivation() {
         super.onDeactivation();
         println("ChickenKiller deactivated.");
-        // Hide GUI when script is deactivated
-        if (chickenKillerGUI != null) {
-            chickenKillerGUI.setVisible(false);
-        }
     }
 
     @Override

@@ -30,7 +30,8 @@ public class ChickenKiller extends Script {
     private long lastGroundItemPickupTime = 0;
     // Delay in milliseconds before attacking another chicken (5 seconds)
     private static final long CHICKEN_ATTACK_DELAY = 5000;
-    private static final long GROUND_ITEM_PICKUP_DELAY = 2000;
+    // Delay in milliseconds before picking up another ground item (1.2 seconds)
+    private static final long GROUND_ITEM_PICKUP_DELAY = 1200;
 
     private final ChickenKillerGUI chickenKillerGUI;
 
@@ -47,36 +48,81 @@ public class ChickenKiller extends Script {
                 return;
             }
 
-            // Bank on full backpack and if banking is enabled
-            if (isBackpackFull() && bankingEnabled) {
-                println("Backpack is full and banking is enabled. We should go to bank and drop off our loot.");
-
+            //Check player health and go to bank if health is low
+            if (player.getHealth() < 100) {
+                println("Player health is low. Going to bank to heal.");
                 // Check if we are already in the bank area or moving
-                if (!GameAreas.BURTHORPE_BANK_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
+                if (!GameAreas.BURTHORPE_BANK_AREA.contains(LocalPlayer.self())) {
                     println("Moving to bank...");
                     // Use the Walker from custom api to move to the bank location
                     int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.BURTHORPE_BANK_LOCATION.x(),
                             GameAreas.BURTHORPE_BANK_LOCATION.y());
                     return;
                 }
+                return;
+            }
 
-                Collection<PathingEntity> banker = World.getNpcs();
-                if (!banker.isEmpty() && !player.isMoving()) {
-                    banker.stream()
-                            .filter(npc -> npc.getName().equalsIgnoreCase("Banker"))
-                            .filter(GameAreas.BURTHORPE_BANK_AREA::contains)
-                            .findFirst()
-                            .ifPresent(npc -> {
-                                println("Found banker: " + npc.getName());
-                                npc.interact("Load last preset from");
-                            });
+            // Bank on full backpack and if banking is enabled
+            if (isBackpackFull() && bankingEnabled) {
+                println("Backpack is full and banking is enabled. We should go to bank and drop off our loot.");
+
+                // Check if we are already in the bank area or moving
+                if (!GameAreas.BURTHORPE_BANK_AREA.contains(LocalPlayer.self())) {
+                    println("Moving to bank...");
+                    int result = MiniMenu.doAction(Action.WALK, 0, GameAreas.BURTHORPE_BANK_LOCATION.x(),
+                            GameAreas.BURTHORPE_BANK_LOCATION.y());
+                    return;
+                } else {
+                    println("Already at bank area. Proceeding to bank.");
+                    Collection<PathingEntity> banker = World.getNpcs();
+                    println("Total NPCs found: " + (banker != null ? banker.size() : "null"));
+
+                    if (banker != null && !banker.isEmpty()) {
+                        // Log all NPCs in the area for debugging
+                        banker.stream()
+                                .filter(GameAreas.BURTHORPE_BANK_AREA::contains)
+                                .forEach(npc -> println("NPC in bank area: " + npc.getName() + " at " + npc.getCoordinate()));
+
+                        if (!player.isMoving()) {
+                            println("Player is not moving, looking for banker...");
+                            banker.stream()
+                                    .filter(npc -> {
+                                        boolean nameMatch = npc.getName().equalsIgnoreCase("Gnome Banker");
+                                        println("Checking NPC: " + npc.getName() + " - Name matches: " + nameMatch);
+                                        return nameMatch;
+                                    })
+                                    .filter(npc -> {
+                                        boolean inArea = GameAreas.BURTHORPE_BANK_AREA.contains(npc);
+                                        println("NPC " + npc.getName() + " in bank area: " + inArea + " at " + npc.getCoordinate());
+                                        return inArea;
+                                    })
+                                    .findFirst()
+                                    .ifPresentOrElse(npc -> {
+                                        println("Found banker: " + npc.getName());
+                                        int result = npc.interact("Load Last Preset from");
+                                        println("Banker interaction result: " + result);
+                                    }, () -> {
+                                        println("No banker found matching criteria!");
+                                    });
+                        } else {
+                            println("Player is moving, waiting...");
+                        }
+                    } else {
+                        println("No NPCs found or collection is empty!");
+                    }
                 }
 
                 return;
             }
 
-            // If we are here, we are not banking, so we can continue with killing chickens
-            println("Continuing with chicken killing...");
+            if (GameAreas.BURTHORPE_BANK_AREA.contains(LocalPlayer.self())) {
+                // Check if health is full
+                if (player.getHealth() < player.getMaxHealth()) {
+                    println("At bank but health not full (" + player.getHealth() + "/" + player.getMaxHealth() + "). Waiting for health to restore...");
+                    return; // Stay at bank until health is full
+                }
+                println("Health is full (" + player.getHealth() + "/" + player.getMaxHealth() + "). Ready to continue.");
+            }
 
             // Check if we are in the chicken area or moving
             if (!GameAreas.CHICKEN_AREA.contains(LocalPlayer.self()) && !player.isMoving()) {
@@ -94,29 +140,27 @@ public class ChickenKiller extends Script {
                         .filter(ItemStack::isValid) // Filter to only include valid ItemStacks
                         .filter(itemStack -> {
                             // Check if the ItemStack contains feathers or bones
-                            return itemStack.getItems().stream().anyMatch(item ->
-                                item.getName().equalsIgnoreCase("Feather") ||
-                                item.getName().equalsIgnoreCase("Bones"));
+                            return itemStack.getItems().stream()
+                                    .anyMatch(item -> item.getName().equalsIgnoreCase("Feather") ||
+                                                    item.getName().equalsIgnoreCase("Bones"));
                         })
                         .min(Comparator.comparingDouble(player::distanceTo)) // Find the nearest item
                         .ifPresent(itemStack -> {
                             // Find the specific item to pick up
                             itemStack.getItems().stream()
-                                .filter(item -> item.getName().equalsIgnoreCase("Feather") ||
-                                              item.getName().equalsIgnoreCase("Bones"))
-                                .findFirst()
-                                .ifPresent(item -> {
-                                    println("Found ground item: " + item.getName() + " at distance: " + player.distanceTo(itemStack));
-                                    long currentTime = System.currentTimeMillis();
-                                    // Check if the delay has passed since the last pickup
-                                    if (currentTime - lastGroundItemPickupTime >= GROUND_ITEM_PICKUP_DELAY) {
-                                        int pickup = item.interact(2); // Pick up the item
-                                        lastGroundItemPickupTime = currentTime; // Update the last pickup time
-                                        if (pickup != 0) {
-                                            println("Sent pickup command for: " + item.getName() + " with result: " + pickup);
+                                    .filter(item -> item.getName().equalsIgnoreCase("Feather") ||
+                                                  item.getName().equalsIgnoreCase("Bones"))
+                                    .findFirst()
+                                    .ifPresent(item -> {
+                                        if (System.currentTimeMillis() - lastGroundItemPickupTime >= GROUND_ITEM_PICKUP_DELAY) {
+                                            println("Found ground item: " + item.getName() + " (quantity: " + item.getQuantity() + ")");
+                                            int pickup = item.interact(2); // Pick up the item
+                                            lastGroundItemPickupTime = System.currentTimeMillis(); // Update the last pickup time
+                                            if (pickup != 0) {
+                                                println("Sent pickup command for: " + item.getName() + " with result: " + pickup);
+                                            }
                                         }
-                                    }
-                                });
+                                    });
                         });
             }
 
@@ -160,6 +204,7 @@ public class ChickenKiller extends Script {
     }
 
     /**
+
      * Checks if the backpack (inventory) is full.
      */
     public boolean isBackpackFull() {

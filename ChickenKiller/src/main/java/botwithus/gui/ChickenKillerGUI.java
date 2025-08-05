@@ -1,38 +1,36 @@
 package botwithus.gui;
 
 import botwithus.ChickenKiller;
-import botwithus.ui.BaseTab;
 import net.botwithus.imgui.ImGui;
 import net.botwithus.ui.workspace.Workspace;
 
-public class ChickenKillerGUI extends BaseTab {
+public class ChickenKillerGUI {
     private final ChickenKiller script;
+    private boolean visible = true;
 
     public ChickenKillerGUI(ChickenKiller script) {
         this.script = script;
     }
 
     public void render(Workspace workspace) {
-        renderMainTab();
-    }
-
-    private void renderMainTab() {
-        renderSectionHeader("Script Settings");
-
-        // Banking toggle
-        boolean currentBankingState = script.isBankingEnabled();
-        if (ImGui.checkbox("Enable Banking", currentBankingState)) {
-            script.setBankingEnabled(!currentBankingState);
+        if (!visible) {
+            return;
         }
 
-        addSpacing();
+        if (ImGui.begin("ChickenKiller", 0)) {
+            boolean currentBankingState = script.isBankingEnabled();
+            if (ImGui.checkbox("Enable Banking", currentBankingState)) {
+                script.setBankingEnabled(!currentBankingState);
+            }
+        }
+        ImGui.end();
+    }
 
-        renderSectionHeader("Script Status");
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
 
-        addSpacing();
-
-        // Display current status
-        ImGui.text("Banking Enabled: " + (script.isBankingEnabled() ? "Yes" : "No"));
-        ImGui.text("Backpack Full: " + (script.isBackpackFull() ? "Yes" : "No"));
+    public boolean isVisible() {
+        return visible;
     }
 }

@@ -5,7 +5,15 @@ import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.minimenu.Action;
 import net.botwithus.rs3.minimenu.MiniMenu;
 
+import java.util.function.Consumer;
+
 public class Movement {
+
+    private final Consumer<String> logger;
+
+    public Movement(Consumer<String> logger) {
+        this.logger = logger;
+    }
 
     /**
      * Moves the player to the chicken area if not already there
@@ -18,7 +26,7 @@ public class Movement {
             return false;
         }
 
-        System.out.println("Moving to chicken area...");
+        logger.accept("Moving to chicken area...");
         int result = MiniMenu.doAction(Action.WALK, 0,
                 GameAreas.CHICKEN_AREA.getRandomCoordinate().x(),
                 GameAreas.CHICKEN_AREA.getRandomCoordinate().y());

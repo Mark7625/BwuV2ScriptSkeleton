@@ -9,11 +9,17 @@ import net.botwithus.rs3.world.World;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 public class Combat {
 
     private long lastChickenInteractionTime = 0;
     private static final long CHICKEN_ATTACK_DELAY = 5000;
+    private final Consumer<String> logger;
+
+    public Combat(Consumer<String> logger) {
+        this.logger = logger;
+    }
 
     /**
      * Attempts to attack chickens in the chicken area
@@ -50,13 +56,13 @@ public class Combat {
      */
     private boolean attackChicken(PathingEntity chicken) {
         LocalPlayer player = LocalPlayer.self();
-        System.out.println("Found nearest chicken: " + chicken.getName());
+        logger.accept("Found nearest chicken: " + chicken.getName());
 
         int attack = chicken.interact("Attack");
         lastChickenInteractionTime = System.currentTimeMillis();
 
         if (attack != 0) {
-            System.out.println("Sent attack command to chicken: " + chicken.getName() +
+            logger.accept("Sent attack command to chicken: " + chicken.getName() +
                              " with result: " + attack + " distance: " + player.distanceTo(chicken));
             return true;
         }

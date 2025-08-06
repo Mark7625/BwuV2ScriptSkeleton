@@ -7,6 +7,7 @@ import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.world.Area;
 import net.botwithus.rs3.world.Coordinate;
 import net.botwithus.scripts.Info;
+import net.botwithus.xapi.game.inventory.Backpack;
 import net.botwithus.xapi.script.permissive.base.PermissiveScript;
 import net.botwithus.xapi.script.permissive.node.LeafNode;
 
@@ -28,19 +29,27 @@ public class FlaxPicker extends PermissiveScript {
     });
 
     @Override
-    public boolean onPreTick() {
-        player = LocalPlayer.self();
-        return super.onPreTick() && player.isValid();
-    }
-
-    @Override
     public void onInitialize() {
         super.onInitialize();
 
-        initStates(
-            new BankState(this, BotState.BANKING.getDescription()),
-            new FlaxPickState(this, BotState.FLAX_PICKING.getDescription())
-        );
+        // Create the states
+        BankState bankState = new BankState(this, BotState.BANKING.getDescription());
+        FlaxPickState flaxPickState = new FlaxPickState(this, BotState.FLAX_PICKING.getDescription());
 
+        // Initialize their nodes explicitly - this is required
+        bankState.initializeNodes();
+        flaxPickState.initializeNodes();
+
+        // Add them to the script using initStates - this sets the first state as current
+        initStates(bankState, flaxPickState);
+
+        // Force set status to confirm state is working
+        setStatus("Script initialized with state: " + getCurrentState().getName());
+    }
+
+    @Override
+    public boolean onPreTick() {
+        player = LocalPlayer.self();
+        return super.onPreTick() && player != null && player.isValid();
     }
 }

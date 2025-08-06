@@ -57,10 +57,6 @@ subprojects {
             "implementation"("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
             "testImplementation"("org.jetbrains.kotlin:kotlin-test:2.1.0")
         }
-
-        if (project.name != "FlaxPicker") {
-            "includeInJar"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
-        }
     }
 
     configure<JavaPluginExtension> {

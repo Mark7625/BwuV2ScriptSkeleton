@@ -10,10 +10,16 @@ import net.botwithus.rs3.minimenu.MiniMenu;
 import net.botwithus.rs3.world.World;
 
 import java.util.Collection;
+import java.util.function.Consumer;
 
 public class Banking {
 
     private static final int BACKPACK_INVENTORY_ID = 93;
+    private final Consumer<String> logger;
+
+    public Banking(Consumer<String> logger) {
+        this.logger = logger;
+    }
 
     /**
      * Checks if the backpack (inventory) is full
@@ -34,11 +40,11 @@ public class Banking {
             return false;
         }
 
-        System.out.println("Backpack is full. Going to bank.");
+        logger.accept("Backpack is full. Going to bank.");
 
         // Move to bank if not already there
-        if (!GameAreas.BURTHORPE_BANK_AREA.contains(player)) {
-            System.out.println("Moving to bank...");
+        if (!GameAreas.BURTHORPE_BANK_AREA.contains(player) && !player.isMoving()) {
+            logger.accept("Moving to bank...");
             MiniMenu.doAction(Action.WALK, 0, GameAreas.BURTHORPE_BANK_LOCATION.x(),
                     GameAreas.BURTHORPE_BANK_LOCATION.y());
             return true;
@@ -65,12 +71,12 @@ public class Banking {
 
         // Check if health is full
         if (player.getHealth() < player.getMaxHealth()) {
-            System.out.println("At bank but health not full (" + player.getHealth() + "/" +
+            logger.accept("At bank but health not full (" + player.getHealth() + "/" +
                              player.getMaxHealth() + "). Waiting for health to restore...");
             return true;
         }
 
-        System.out.println("Health is full (" + player.getHealth() + "/" +
+        logger.accept("Health is full (" + player.getHealth() + "/" +
                          player.getMaxHealth() + "). Ready to continue.");
         return false;
     }
@@ -86,10 +92,10 @@ public class Banking {
             return false;
         }
 
-        System.out.println("Player health is low (" + player.getHealth() + "). Going to bank to heal.");
+        logger.accept("Player health is low (" + player.getHealth() + "). Going to bank to heal.");
 
         if (!GameAreas.BURTHORPE_BANK_AREA.contains(player)) {
-            System.out.println("Moving to bank for healing...");
+            logger.accept("Moving to bank for healing...");
             MiniMenu.doAction(Action.WALK, 0, GameAreas.BURTHORPE_BANK_LOCATION.x(),
                     GameAreas.BURTHORPE_BANK_LOCATION.y());
         }
@@ -104,7 +110,7 @@ public class Banking {
         Collection<PathingEntity> npcs = World.getNpcs();
 
         if (npcs == null || npcs.isEmpty()) {
-            System.out.println("No NPCs found!");
+            logger.accept("No NPCs found!");
             return;
         }
 
@@ -113,15 +119,15 @@ public class Banking {
                 .filter(npc -> npc.getName().equalsIgnoreCase("Gnome Banker"))
                 .findFirst()
                 .ifPresentOrElse(npc -> {
-                    System.out.println("Found banker: " + npc.getName());
+                    logger.accept("Found banker: " + npc.getName());
                     int result = npc.interact("Load Last Preset from");
-                    System.out.println("Banker interaction result: " + result);
+                    logger.accept("Banker interaction result: " + result);
                 }, () -> {
-                    System.out.println("No banker found!");
+                    logger.accept("No banker found!");
                     // Debug log all NPCs in bank area
                     npcs.stream()
                             .filter(GameAreas.BURTHORPE_BANK_AREA::contains)
-                            .forEach(npc -> System.out.println("NPC in bank area: " + npc.getName()));
+                            .forEach(npc -> logger.accept("NPC in bank area: " + npc.getName()));
                 });
     }
 }

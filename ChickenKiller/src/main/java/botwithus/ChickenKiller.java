@@ -25,10 +25,10 @@ public class ChickenKiller extends Script {
 
     public ChickenKiller() {
         this.chickenKillerGUI = new ChickenKillerGUI(this);
-        this.banking = new Banking();
-        this.combat = new Combat();
-        this.looting = new Looting();
-        this.movement = new Movement();
+        this.banking = new Banking(this::println);
+        this.combat = new Combat(this::println);
+        this.looting = new Looting(this::println);
+        this.movement = new Movement(this::println);
     }
 
     @Override

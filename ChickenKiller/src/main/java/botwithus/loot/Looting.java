@@ -7,11 +7,17 @@ import net.botwithus.rs3.world.World;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.function.Consumer;
 
 public class Looting {
 
     private long lastGroundItemPickupTime = 0;
     private static final long GROUND_ITEM_PICKUP_DELAY = 1200;
+    private final Consumer<String> logger;
+
+    public Looting(Consumer<String> logger) {
+        this.logger = logger;
+    }
 
     /**
      * Attempts to pick up feathers and bones in the chicken area
@@ -59,15 +65,15 @@ public class Looting {
                               item.getName().equalsIgnoreCase("Bones"))
                 .findFirst()
                 .map(item -> {
-                    System.out.println("Found ground item: " + item.getName() + " (quantity: " + item.getQuantity() + ")");
+                    logger.accept("Found ground item: " + item.getName() + " (quantity: " + item.getQuantity() + ")");
                     int pickup = item.interact(2);
                     lastGroundItemPickupTime = System.currentTimeMillis();
 
                     if (pickup != 0) {
-                        System.out.println("Sent pickup command for: " + item.getName() + " with result: " + pickup);
+                        logger.accept("Sent pickup command for: " + item.getName() + " with result: " + pickup);
                         return true;
                     } else {
-                        System.out.println("Failed to send pickup command for: " + item.getName());
+                        logger.accept("Failed to send pickup command for: " + item.getName());
                         return false;
                     }
                 })

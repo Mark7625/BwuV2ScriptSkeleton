@@ -11,13 +11,13 @@ import net.botwithus.scripts.Info;
 import net.botwithus.scripts.Script;
 import net.botwithus.ui.workspace.Workspace;
 
-@Info(name = "CoaezChickenKiller", description = "ChickenKiller script", version = "1.0.0", author = "coaez")
+@Info(name = "ChickenKiller", description = "ChickenKiller script", version = "1.0.0", author = "BotWithUs")
 public class ChickenKiller extends Script {
 
     private boolean bankingEnabled = true;
     private final ChickenKillerGUI chickenKillerGUI;
 
-    // Refactored components
+    // components
     private final Banking banking;
     private final Combat combat;
     private final Looting looting;

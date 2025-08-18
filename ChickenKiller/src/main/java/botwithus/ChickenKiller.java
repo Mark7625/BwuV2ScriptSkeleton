@@ -5,8 +5,7 @@ import botwithus.combat.Combat;
 import botwithus.gui.ChickenKillerGUI;
 import botwithus.loot.Looting;
 import botwithus.areas.GameAreas;
-import botwithus.navigation.api.NavPath;
-import botwithus.navigation.api.State;
+import botwithus.movement.Movement;
 import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.client.Client;
 import net.botwithus.rs3.world.ClientState;
@@ -24,15 +23,14 @@ public class ChickenKiller extends Script {
     private final Banking banking;
     private final Combat combat;
     private final Looting looting;
-    
-    // navigation
-    private NavPath currentPath;
+    private final Movement movement;
 
     public ChickenKiller() {
         this.chickenKillerGUI = new ChickenKillerGUI(this);
         this.banking = new Banking(this::println);
         this.combat = new Combat(this::println);
         this.looting = new Looting(this::println);
+        this.movement = new Movement();
     }
 
     @Override
@@ -120,8 +118,7 @@ public class ChickenKiller extends Script {
     @Override
     public void onDeactivation() {
         super.onDeactivation();
-        // Clear any active navigation path
-        currentPath = null;
+        movement.resetNavPath();
         println("ChickenKiller deactivated.");
     }
 
@@ -132,7 +129,7 @@ public class ChickenKiller extends Script {
     }
 
     /**
-     * Handles movement to chicken area using Navigation API with proper state management
+     * Handles movement to chicken area using Movement class
      * @return true if movement is in progress or needs to continue
      */
     private boolean moveToChickenArea() {
@@ -140,50 +137,22 @@ public class ChickenKiller extends Script {
 
         // If already in area, no movement needed
         if (GameAreas.CHICKEN_AREA.contains(player)) {
-            if (currentPath != null) {
+            if (movement.hasActiveNavPath()) {
                 println("Reached chicken area!");
-                currentPath = null;
+                movement.resetNavPath();
             }
             return false;
         }
 
-        // If no current path exists, create one
-        if (currentPath == null) {
-            println("Creating path to chicken area...");
-            // Use default flags (all abilities enabled: teleports, surge, dive)
-            int flags = 0;
-            currentPath = NavPath.resolve(GameAreas.CHICKEN_AREA.getRandomCoordinate(), flags);
+        // Process any existing navigation
+        if (movement.processNavPath()) {
             return true;
         }
 
-        // Process the current path
-        currentPath.process();
-        State state = currentPath.state();
-        
-        switch (state) {
-            case CONTINUE:
-                println("Following path to chicken area...");
-                return true;
-                
-            case FINISHED:
-                println("Successfully reached chicken area!");
-                currentPath = null;
-                return false;
-                
-            case FAILED:
-                println("Failed to reach chicken area, retrying...");
-                currentPath = null;
-                return true;
-                
-            case NO_PATH:
-                println("No path found to chicken area!");
-                currentPath = null;
-                return false;
-                
-            case IDLE:
-            default:
-                return true;
-        }
+        // If no active path, create one to chicken area
+        println("Creating path to chicken area...");
+        movement.navigateToTile(GameAreas.CHICKEN_AREA.getRandomCoordinate(), true, false, true);
+        return true;
     }
 
     /**
@@ -191,7 +160,6 @@ public class ChickenKiller extends Script {
      */
     private boolean isReadyForCombat() {
         LocalPlayer player = LocalPlayer.self();
-        // Ready if in area and no active navigation
-        return GameAreas.CHICKEN_AREA.contains(player) && currentPath == null && !player.isMoving();
+        return GameAreas.CHICKEN_AREA.contains(player) && !movement.hasActiveNavPath() && !player.isMoving();
     }
 }

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \"C:\\Users\\aleks\\Documents\\GitHub\\SlayerWithUs\\src\\main\\java\\botwithus\\gui\")",
+      "Bash(mkdir:*)",
+      "Bash(cp \"C:\\Users\\aleks\\Documents\\GitHub\\BwuV2ScriptSkeleton\\gradle\\wrapper\\gradle-wrapper.jar\" \"C:\\Users\\aleks\\Documents\\GitHub\\SlayerWithUs\\gradle\\wrapper\"\")",
+      "Bash(copy:*)",
+      "Bash(cp:*)",
+      "Bash(.gradlew.bat build)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

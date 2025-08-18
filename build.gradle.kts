@@ -13,9 +13,6 @@ allprojects {
         mavenLocal()
         mavenCentral()
         maven {
-            setUrl("https://nexus.botwithus.net/repository/maven-releases/")
-        }
-        maven {
             setUrl("https://nexus.botwithus.net/repository/maven-snapshots/")
         }
     }
@@ -47,10 +44,10 @@ subprojects {
     // Configure dependencies
     dependencies {
         // External dependencies for all projects
-        "implementation"("net.botwithus.api:api:1.0.4-SNAPSHOT")
-        "implementation"("net.botwithus.xapi:xapi:1.0.0-SNAPSHOT")
-        "implementation"("net.botwithus.imgui:imgui:1.0.1-SNAPSHOT")
-        
+        "implementation"("net.botwithus.api:api:1.+")
+        "implementation"("net.botwithus.xapi.public:api:1.0.0-SNAPSHOT")
+        "implementation"("net.botwithus.imgui:imgui:1.+")
+        "implementation"("botwithus.navigation:nav-api:1.0.0-SNAPSHOT")
         // Add Kotlin dependencies only if Kotlin files are present
         if (hasKotlinFiles) {
             "implementation"("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")

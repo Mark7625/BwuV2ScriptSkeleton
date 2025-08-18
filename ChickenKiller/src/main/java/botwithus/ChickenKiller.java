@@ -4,7 +4,10 @@ import botwithus.banking.Banking;
 import botwithus.combat.Combat;
 import botwithus.gui.ChickenKillerGUI;
 import botwithus.loot.Looting;
-import botwithus.movement.Movement;
+import botwithus.areas.GameAreas;
+import botwithus.navigation.api.NavPath;
+import botwithus.navigation.api.State;
+import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.client.Client;
 import net.botwithus.rs3.world.ClientState;
 import net.botwithus.scripts.Info;
@@ -21,14 +24,15 @@ public class ChickenKiller extends Script {
     private final Banking banking;
     private final Combat combat;
     private final Looting looting;
-    private final Movement movement;
+    
+    // navigation
+    private NavPath currentPath;
 
     public ChickenKiller() {
         this.chickenKillerGUI = new ChickenKillerGUI(this);
         this.banking = new Banking(this::println);
         this.combat = new Combat(this::println);
         this.looting = new Looting(this::println);
-        this.movement = new Movement(this::println);
     }
 
     @Override
@@ -55,12 +59,12 @@ public class ChickenKiller extends Script {
             }
 
             // Move to chicken area if not already there
-            if (movement.moveToChickenArea()) {
+            if (moveToChickenArea()) {
                 return;
             }
 
             // Only proceed with combat/looting if ready
-            if (!movement.isReadyForCombat()) {
+            if (!isReadyForCombat()) {
                 return;
             }
 
@@ -116,6 +120,8 @@ public class ChickenKiller extends Script {
     @Override
     public void onDeactivation() {
         super.onDeactivation();
+        // Clear any active navigation path
+        currentPath = null;
         println("ChickenKiller deactivated.");
     }
 
@@ -123,5 +129,69 @@ public class ChickenKiller extends Script {
     public void onInitialize() {
         super.onInitialize();
         println("ChickenKiller initialized.");
+    }
+
+    /**
+     * Handles movement to chicken area using Navigation API with proper state management
+     * @return true if movement is in progress or needs to continue
+     */
+    private boolean moveToChickenArea() {
+        LocalPlayer player = LocalPlayer.self();
+
+        // If already in area, no movement needed
+        if (GameAreas.CHICKEN_AREA.contains(player)) {
+            if (currentPath != null) {
+                println("Reached chicken area!");
+                currentPath = null;
+            }
+            return false;
+        }
+
+        // If no current path exists, create one
+        if (currentPath == null) {
+            println("Creating path to chicken area...");
+            // Use default flags (all abilities enabled: teleports, surge, dive)
+            int flags = 0;
+            currentPath = NavPath.resolve(GameAreas.CHICKEN_AREA.getRandomCoordinate(), flags);
+            return true;
+        }
+
+        // Process the current path
+        currentPath.process();
+        State state = currentPath.state();
+        
+        switch (state) {
+            case CONTINUE:
+                println("Following path to chicken area...");
+                return true;
+                
+            case FINISHED:
+                println("Successfully reached chicken area!");
+                currentPath = null;
+                return false;
+                
+            case FAILED:
+                println("Failed to reach chicken area, retrying...");
+                currentPath = null;
+                return true;
+                
+            case NO_PATH:
+                println("No path found to chicken area!");
+                currentPath = null;
+                return false;
+                
+            case IDLE:
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Checks if player is ready for combat (in area and not moving)
+     */
+    private boolean isReadyForCombat() {
+        LocalPlayer player = LocalPlayer.self();
+        // Ready if in area and no active navigation
+        return GameAreas.CHICKEN_AREA.contains(player) && currentPath == null && !player.isMoving();
     }
 }

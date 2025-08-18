@@ -6,6 +6,7 @@ import net.botwithus.ui.workspace.Workspace;
 
 public class ChickenKillerGUI {
     private final ChickenKiller script;
+    private boolean showDebugWindow = false;
 
     public ChickenKillerGUI(ChickenKiller script) {
         this.script = script;
@@ -13,11 +14,7 @@ public class ChickenKillerGUI {
 
     public void render(Workspace workspace) {
         if (ImGui.begin("ChickenKiller", 0)) {
-            // Banking toggle
-            boolean currentBankingState = script.isBankingEnabled();
-            if (ImGui.checkbox("Enable Banking", currentBankingState)) {
-                script.setBankingEnabled(!currentBankingState);
-            }
+            script.setBankingEnabled(ImGui.checkbox("Enable Banking", script.isBankingEnabled()));
         }
         ImGui.end();
     }

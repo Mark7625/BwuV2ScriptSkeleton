@@ -7,7 +7,7 @@ import net.botwithus.rs3.entities.LocalPlayer;
 import net.botwithus.rs3.world.Area;
 import net.botwithus.rs3.world.Coordinate;
 import net.botwithus.scripts.Info;
-import net.botwithus.xapi.game.inventory.Backpack;
+import net.botwithus.ui.workspace.Workspace;
 import net.botwithus.xapi.script.permissive.base.PermissiveScript;
 import net.botwithus.xapi.script.permissive.node.LeafNode;
 
@@ -28,9 +28,19 @@ public class FlaxPicker extends PermissiveScript {
         setCurrentState(BotState.BANKING.getDescription());
     });
 
+    public FlaxPicker() {
+        getLogger().debug("HELLO");
+    }
+
+    @Override
+    public void onDraw(Workspace workspace) {
+        super.onDraw(workspace);
+    }
+
     @Override
     public void onInitialize() {
         super.onInitialize();
+        getLogger().debug("In onInitialize");
 
         // Create the states
         BankState bankState = new BankState(this, BotState.BANKING.getDescription());

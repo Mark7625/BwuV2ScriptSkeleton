@@ -9,7 +9,13 @@ group = "botwithus"
 version = "1.0.0"
 
 allprojects {
-    apply(plugin = "kotlin")
+    val hasKotlin = file("src/main/kotlin").exists() || file("src/test/kotlin").exists()
+
+    if (hasKotlin) {
+        apply(plugin = "kotlin")
+    } else {
+        apply(plugin = "java")
+    }
 
     repositories {
         mavenLocal()
@@ -20,18 +26,20 @@ allprojects {
 
     configurations {
         create("includeInJar") {
-            this.isTransitive = false
+            isTransitive = false
         }
     }
 
     extensions.configure<JavaPluginExtension> {
         val javaModuleInfo = file("src/main/java/module-info.java")
-        val kotlinModuleInfo = file("src/main/kotlin/module-info.java")
-
-        if (javaModuleInfo.exists() || kotlinModuleInfo.exists()) {
+        if (javaModuleInfo.exists()) {
             modularity.inferModulePath.set(true)
         } else if (project != rootProject) {
             throw GradleException("ERROR: No module-info.java found in src/main/java/ or src/main/kotlin/ for project ${project.name}")
+        }
+
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(24))
         }
     }
 
@@ -42,24 +50,34 @@ allprojects {
         implementation("net.botwithus.xapi:xapi:2.0.+")
         implementation("botwithus.navigation:nav-api:1.+")
         add("includeInJar", "net.botwithus.xapi:xapi:2.0.+")
+
+        if (hasKotlin) {
+            implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
+            testImplementation("org.jetbrains.kotlin:kotlin-test:2.2.0")
+        }
+    }
+
+    if (hasKotlin) {
+        java {
+            modularity.inferModulePath.set(true)
+        }
+
+        tasks.compileKotlin {
+            destinationDirectory.set(tasks.compileJava.get().destinationDirectory)
+        }
+
+        tasks.withType<KotlinCompile>().configureEach {
+            compilerOptions {
+                jvmTarget.set(JvmTarget.JVM_24)
+                freeCompilerArgs.add("-Xjdk-release=24")
+            }
+        }
     }
 
     tasks.withType<Jar>().configureEach {
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         from(configurations["includeInJar"].map { zipTree(it) })
-    }
-
-    extensions.configure<JavaPluginExtension> {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(24))
-        }
-    }
-
-    tasks.withType<KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
-            freeCompilerArgs.add("-Xjdk-release=24")
-        }
     }
 
     val copyJar by tasks.register<Copy>("copyJar") {
@@ -68,11 +86,7 @@ allprojects {
     }
 
     tasks.named<Jar>("jar") {
-        from({
-            configurations["includeInJar"].map { zipTree(it) }
-        })
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         finalizedBy(copyJar)
     }
-
 }

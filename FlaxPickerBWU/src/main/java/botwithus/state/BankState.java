@@ -1,6 +1,6 @@
 package botwithus.state;
 
-import botwithus.FlaxPicker;
+import botwithus.FlaxPickerBWU;
 import net.botwithus.rs3.world.Distance;
 import net.botwithus.util.Rand;
 import net.botwithus.xapi.game.inventory.Backpack;
@@ -13,7 +13,7 @@ import net.botwithus.xapi.script.permissive.node.Branch;
 import net.botwithus.xapi.script.permissive.node.LeafNode;
 
 public class BankState extends PermissiveScript.State {
-    private FlaxPicker script;
+    private FlaxPickerBWU script;
 
     // Define branches and leaf nodes for the BankState
     private Branch isBackpackFull;
@@ -26,15 +26,15 @@ public class BankState extends PermissiveScript.State {
 
     private final int INTERACT_DISTANCE = 10, NEARBY_DISTANCE = 20;
 
-    public BankState(FlaxPicker script, String name) {
+    public BankState(FlaxPickerBWU script, String name) {
         super(name);
         this.script = script;
+        initializeNodes();
     }
 
     // Initialize the nodes for the BankState
     @Override
     public void initializeNodes() {
-
         // Initialize Branches
         isBackpackFull = new Branch(script, "isBackpackFull", new Interlock("isBackpackFull",
             new Permissive("backpackFull", Backpack::isFull)
@@ -45,7 +45,7 @@ public class BankState extends PermissiveScript.State {
         ));
 
         isNearBank = new Branch(script, "isNearBank", new Interlock("isNearBank",
-            new Permissive("bankNearby", () -> Distance.to(script.bankArea) < NEARBY_DISTANCE)
+            new Permissive("bankNearby", () -> Distance.to(script.BANK_AREA) < NEARBY_DISTANCE)
         ));
 
 
@@ -54,10 +54,11 @@ public class BankState extends PermissiveScript.State {
 
         openBankLeaf = new LeafNode(script, "openBankLeaf", () -> {
             script.setStatus("Opening bank");
-            if (Bank.open()) {
+            if (Bank.open(script)) {
                 script.delayUntil(Bank::isOpen, Rand.nextInt(10, 14));
             } else {
                 script.debug("Failed to open bank");
+                script.delay(6);
             }
         });
 
@@ -72,14 +73,13 @@ public class BankState extends PermissiveScript.State {
 
         traverseToBankLeaf = new LeafNode(script, "traverseToBankLeaf", () -> {
             script.setStatus("Traversing to bank");
-            if (Traverse.to(script.bankArea.getRandomCoordinate())) {
-                script.delayUntil(() -> Distance.to(script.bankArea) < INTERACT_DISTANCE, Rand.nextInt(10, 14));
+            if (Traverse.to(script.BANK_AREA.getRandomCoordinate())) {
+                script.delayUntil(() -> Distance.to(script.BANK_AREA) < INTERACT_DISTANCE, Rand.nextInt(10, 14));
             } else {
                 script.warn("Failed to traverse to bank");
                 script.delay(5);
             }
         });
-
 
         // Define Tree Traversal Structure
         isBackpackFull.setChildrenNodes(isBankOpen, toPickingStateLeaf);
